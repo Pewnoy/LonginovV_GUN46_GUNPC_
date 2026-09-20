@@ -2,6 +2,7 @@
 using GamePrototype.Items.EquipItems;
 using GamePrototype.Utils;
 using System.Text;
+using System;
 
 namespace GamePrototype.Units
 {
@@ -37,11 +38,20 @@ namespace GamePrototype.Units
 
         public override void AddItemToInventory(Item item)
         {
-            if (item is EquipItem equipItem && _equipment.TryAdd(equipItem.Slot, equipItem)) 
+            if (item is EquipItem equipItem)
             {
+                if (_equipment.ContainsKey(equipItem.Slot))
+                {
+                    Console.WriteLine($"Equipment replaced: {_equipment[equipItem.Slot].Name} -> {equipItem.Name}");
+
+                    _equipment[equipItem.Slot] = equipItem;
+                    return;
+                }
+                _equipment.Add(equipItem.Slot, equipItem);
                 // Item was equipped
                 return;
             }
+
             base.AddItemToInventory(item);
         }
 
