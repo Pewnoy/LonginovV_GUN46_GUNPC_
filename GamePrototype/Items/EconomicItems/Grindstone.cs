@@ -4,8 +4,11 @@
     {
         public override bool Stackable => false;
 
-        public Grindstone(string name) : base(name)
+        public uint RepairAmount { get; }
+
+        public Grindstone(string name, uint repairAmount) : base(name)
         {
-        }    
+            RepairAmount = repairAmount;
+        }
     }
 }
