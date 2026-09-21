@@ -7,11 +7,23 @@ namespace GamePrototype.Game
 {
     public sealed class GameLoop
     {
+        private readonly IUnitFactory _unitFactory;
+        private readonly IDungeonBuilder _dungeonBuilder;
+
         private Unit _player;
         private DungeonRoom _dungeon;
         private readonly CombatManager _combatManager = new CombatManager();
-        
-        public void StartGame() 
+
+        public GameLoop(IUnitFactory unitFactory, IDungeonBuilder dungeonBuilder)
+        {
+            _unitFactory = unitFactory;
+            _dungeonBuilder = dungeonBuilder;
+
+            _player = null!;
+            _dungeon = null!;
+        }
+
+        public void StartGame()
         {
             Initialize();
             Console.WriteLine("Entering the dungeon");
@@ -19,42 +31,48 @@ namespace GamePrototype.Game
         }
 
         #region Game Loop
-
         private void Initialize()
         {
             Console.WriteLine("Welcome, player!");
-            _dungeon = DungeonBuilder.BuildDungeon();
+
+            _dungeon = _dungeonBuilder.BuildDungeon();
+
             Console.WriteLine("Enter your name");
-            _player = UnitFactoryDemo.CreatePlayer(Console.ReadLine());
+            _player = _unitFactory.CreatePlayer(Console.ReadLine() ?? "Player");
+
             Console.WriteLine($"Hello {_player.Name}");
         }
 
         private void StartGameLoop()
         {
             var currentRoom = _dungeon;
-            
-            while (currentRoom.IsFinal == false) 
+
+            while (currentRoom.IsFinal == false)
             {
                 StartRoomEncounter(currentRoom, out var success);
-                if (!success) 
+
+                if (!success)
                 {
                     Console.WriteLine("Game over!");
                     return;
                 }
+
                 DisplayRouteOptions(currentRoom);
-                while (true) 
+
+                while (true)
                 {
-                    if (Enum.TryParse<Direction>(Console.ReadLine(), out var direction) ) 
+                    if (Enum.TryParse<Direction>(Console.ReadLine(), out var direction))
                     {
                         currentRoom = currentRoom.Rooms[direction];
                         break;
                     }
-                    else 
+                    else
                     {
                         Console.WriteLine("Wrong direction!");
                     }
                 }
             }
+
             Console.WriteLine($"Congratulations, {_player.Name}");
             Console.WriteLine("Result: ");
             Console.WriteLine(_player.ToString());
@@ -63,18 +81,20 @@ namespace GamePrototype.Game
         private void StartRoomEncounter(DungeonRoom currentRoom, out bool success)
         {
             success = true;
-            if (currentRoom.Loot != null) 
+
+            if (currentRoom.Loot != null)
             {
                 _player.AddItemToInventory(currentRoom.Loot);
             }
-            if (currentRoom.Enemy != null) 
+
+            if (currentRoom.Enemy != null)
             {
                 if (_combatManager.StartCombat(_player, currentRoom.Enemy) == _player)
                 {
                     _player.HandleCombatComplete();
                     LootEnemy(currentRoom.Enemy);
                 }
-                else 
+                else
                 {
                     success = false;
                 }
@@ -89,13 +109,13 @@ namespace GamePrototype.Game
         private void DisplayRouteOptions(DungeonRoom currentRoom)
         {
             Console.WriteLine("Where to go?");
+
             foreach (var room in currentRoom.Rooms)
             {
-                Console.Write($"{room.Key} - {(int) room.Key}\t");
+                Console.Write($"{room.Key} - {(int)room.Key}\t");
             }
         }
 
-        
         #endregion
     }
 }

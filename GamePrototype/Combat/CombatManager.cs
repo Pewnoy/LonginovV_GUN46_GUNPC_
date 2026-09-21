@@ -6,9 +6,9 @@ namespace GamePrototype.Combat
     {
         private readonly Random _random = new();
         
-        public Unit StartCombat(Unit player, Unit enemy) => PlayCombatRoutine(player, enemy);
+        public Unit? StartCombat(Unit player, Unit enemy) => PlayCombatRoutine(player, enemy);
 
-        private Unit PlayCombatRoutine(Unit player, Unit enemy)
+        private Unit? PlayCombatRoutine(Unit player, Unit enemy)
         {
             Console.WriteLine(GetCombatString());
             while (player.Health > 0 && enemy.Health > 0) 
@@ -30,7 +30,6 @@ namespace GamePrototype.Combat
             {
                 return enemy;
             }
-
             return null;
         }
 
